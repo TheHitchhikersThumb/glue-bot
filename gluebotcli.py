@@ -182,4 +182,5 @@ async def on_message(message): # On ANY message.
     """
 
 print(discord.__version__)
-client.run('NzUzMjg3ODM3ODgwOTQyNjIy.X1j_9w.2BPAtV8ve_T6stwFEwvCQf9uNiQ')
+token = ""
+client.run(token)

@@ -1,12 +1,5 @@
 import discord
 import random
-import pymongo
-from pymongo import MongoClient
-
-# Mongo Client
-cluster = MongoClient("mongodb+srv://dylhit:qsi12345@gluecluster.kmn2g.mongodb.net/test")
-db = cluster["GlueDatabase"]
-collection = db["GlueCollection"]
 
 # Setting up empty pots, boards, questions.
 client = discord.Client()
@@ -35,22 +28,8 @@ async def on_message(message): # On ANY message.
     if message.author == client.user: # If Glue made the message being analyzed, there's no need to continue.
         return
 
-    def pred(m):
-        return m.author == message.author and m.channel == message.channel
-
-    """
-    if message.content.startswith('$y '):
-        arg = message.content[3:]
-        url = "https://www.youtube.com/results?search_query=%s" % (arg.replace(" ", "+"))
-        html_content = urllib.request.urlopen(url)
-        print(html_content)
-        search_results = re.findall(r'href=\"\/watch\?v=(.{11})', html_content.read().decode())
-        print(len(search_results))
-        print("http://www.youtube.com/watch?v=" + search_results[0])
-
-    if message.content.startswith("$advice"):
-        await message.channel.send(random.choice(advice))
-    """
+    def check(m): # Used for "wait_for" in $rq.
+            return m.content == 'hello' and m.channel == channel
 
     # Help
     if message.content.startswith("$help"):
@@ -63,13 +42,11 @@ async def on_message(message): # On ANY message.
     if message.content.startswith("$p"):
         arg = message.content.split(' ', 1) # Splits the message into "$p", and the rest.
         if len(arg) < 2: # If the message is just "$p"...
-            #try:
-            pick = db.collection.find_one() # Picks a random message out of the pot.
-            await message.channel.send("We fetched this from the pot:")
-            await message.channel.send(pick)
-            db.collection.delete_one({"post" : pick["post"]}) # Removes the message from the pot.
-            #except: # If an error occurs.
-                #await message.channel.send("Sorry, the pot is empty right now.")
+            try:
+                await message.channel.send("We fetched this from the pot:")
+                await message.channel.send(pick)
+            except: # If an error occurs.
+                await message.channel.send("Sorry, the pot is empty right now.")
         else: # If the message is "$p message..."
             pot.append(arg[1]) # The message is added. 
             await message.channel.send("Your message \"%s\" has been added." % (arg[1]))
@@ -146,7 +123,7 @@ async def on_message(message): # On ANY message.
             finished = False # For the loop below.
             question_progress[message.author] = pick
             while finished == False: # The loop either ends with a proper "$rq" reply or a proper "$sq" reply.
-                rep = await client.wait_for('message', check = pred) # Checks every message for an "$rq" or "$sq" message.
+                rep = await client.wait_for('message', check = check) # Checks every message for an "$rq" or "$sq" message.
                 if rep.content.startswith("$rq"): # For an "$rq" reply.
                     arg = rep.content.split(' ', 1) # Splits the reply into "$rq" and the rest.
                     if len(arg) < 2: # If the reply is just "$rq"...
